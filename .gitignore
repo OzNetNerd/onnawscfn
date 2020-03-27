@@ -1,0 +1,5 @@
+venv/
+.idea/
+onnawscfn.egg-info/
+dist/
+__pycache__/

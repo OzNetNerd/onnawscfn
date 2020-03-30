@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     url='https://onnawscfn.oznetnerd.com',
     install_requires=[
-        'onnlogger==0.0.5'
+        'boto3'
     ],
     license='',
     author='Will Robinson',

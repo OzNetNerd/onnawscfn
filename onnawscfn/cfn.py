@@ -121,12 +121,13 @@ class Cfn:
             else:
                 self._aws_exception_msg(e)
 
-    def waiter(self, wait_for_status, cfn_client=None):
+    def waiter(self, wait_for_status, stack_name, cfn_client=None):
         """Description:
             CloudFormation waiter
 
         Args:
-            wait_for_status: Wait for status, e.g `stack_create_complete`
+            wait_for_status (str): Wait for status, e.g `stack_create_complete`
+            stack_name (str): Name of the CloudFormation stack
             cfn_client: (Optional) `cloudformation` client - used for assumed roles
 
         Example:
@@ -142,7 +143,7 @@ class Cfn:
 
         try:
             waiter = cfn_client.get_waiter(wait_for_status)
-            waiter.wait()
+            waiter.wait(StackName=stack_name)
 
         except ClientError as e:
             self._aws_exception_msg(e)

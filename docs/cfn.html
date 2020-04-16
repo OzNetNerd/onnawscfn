@@ -31,7 +31,7 @@ from pprint import pformat
 
 
 class Cfn:
-    def __init__(self, logger):
+    def __init__(self, logger, default_resource=None):
         &#34;&#34;&#34;Description:
             Convenience Python module for AWS CloudFormation
 
@@ -46,7 +46,7 @@ class Cfn:
                 cfn = Cfn(logger)
         &#34;&#34;&#34;
         self.logger = logger
-        self.default_cfn_client = boto3.client(&#39;cloudformation&#39;)
+        self.default_cfn_resource = default_resource if default_resource else boto3.resource(&#39;cloudformation&#39;)
 
     def dict_to_cfn_params(self, dict_params) -&gt; list:
         &#34;&#34;&#34;Description:
@@ -86,13 +86,13 @@ class Cfn:
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation params:\n{pformat(cfn_params)}&#39;)
         return cfn_params
 
-    def create_stack(self, cfn_settings, cfn_client=None):
+    def create_stack(self, cfn_settings, cfn_resource=None):
         &#34;&#34;&#34;Description:
             Creates a CloudFormation stack
 
         Args:
             cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -126,13 +126,13 @@ class Cfn:
             [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) response or `False` if a template with this name already exists
 
         &#34;&#34;&#34;
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
         stack_name = cfn_settings[&#39;StackName&#39;]
         self.logger.entry(&#39;info&#39;, f&#39;Creating &#34;{stack_name}&#34; stack...&#39;)
 
         try:
-            stack_details = cfn_client.create_stack(**cfn_settings)
+            stack_details = cfn_resource.create_stack(**cfn_settings)
             self.logger.entry(&#39;debug&#39;, f&#39;Stack details:\n{pformat(stack_details)}&#39;)
 
             return stack_details
@@ -147,13 +147,14 @@ class Cfn:
             else:
                 self._aws_exception_msg(e)
 
-    def waiter(self, wait_for_status, cfn_client=None):
+    def waiter(self, wait_for_status, stack_name, cfn_resource=None):
         &#34;&#34;&#34;Description:
             CloudFormation waiter
 
         Args:
-            wait_for_status: Wait for status, e.g `stack_create_complete`
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            wait_for_status (str): Wait for status, e.g `stack_create_complete`
+            stack_name (str): Name of the CloudFormation stack
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -164,11 +165,11 @@ class Cfn:
             None
 
         &#34;&#34;&#34;
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
         try:
-            waiter = cfn_client.get_waiter(wait_for_status)
-            waiter.wait()
+            waiter = cfn_resource.get_waiter(wait_for_status)
+            waiter.wait(StackName=stack_name)
 
         except ClientError as e:
             self._aws_exception_msg(e)
@@ -178,12 +179,12 @@ class Cfn:
         msg = e.response[&#39;Error&#39;][&#39;Message&#39;]
         sys.exit(f&#39;Error: {msg}&#39;)
 
-    def outputs_to_dict(self, cfn_id, cfn_client=None):
+    def outputs_to_dict(self, cfn_id, cfn_resource=None):
         &#34;&#34;&#34;
 
         Args:
             cfn_id: CloudFormation ID from which to extract the outputs
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -197,9 +198,9 @@ class Cfn:
             CloudFormation outputs as a dictionary
         &#34;&#34;&#34;
         self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
-        cfn_details = cfn_client.describe_stacks(StackName=cfn_id)
+        cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
         cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
@@ -224,7 +225,7 @@ class Cfn:
 <dl>
 <dt id="onnawscfn.cfn.Cfn"><code class="flex name class">
 <span>class <span class="ident">Cfn</span></span>
-<span>(</span><span>logger)</span>
+<span>(</span><span>logger, default_resource=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="description">Description</h2>
@@ -245,7 +246,7 @@ cfn = Cfn(logger)
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Cfn:
-    def __init__(self, logger):
+    def __init__(self, logger, default_resource=None):
         &#34;&#34;&#34;Description:
             Convenience Python module for AWS CloudFormation
 
@@ -260,7 +261,7 @@ cfn = Cfn(logger)
                 cfn = Cfn(logger)
         &#34;&#34;&#34;
         self.logger = logger
-        self.default_cfn_client = boto3.client(&#39;cloudformation&#39;)
+        self.default_cfn_resource = default_resource if default_resource else boto3.resource(&#39;cloudformation&#39;)
 
     def dict_to_cfn_params(self, dict_params) -&gt; list:
         &#34;&#34;&#34;Description:
@@ -300,13 +301,13 @@ cfn = Cfn(logger)
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation params:\n{pformat(cfn_params)}&#39;)
         return cfn_params
 
-    def create_stack(self, cfn_settings, cfn_client=None):
+    def create_stack(self, cfn_settings, cfn_resource=None):
         &#34;&#34;&#34;Description:
             Creates a CloudFormation stack
 
         Args:
             cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -340,13 +341,13 @@ cfn = Cfn(logger)
             [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) response or `False` if a template with this name already exists
 
         &#34;&#34;&#34;
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
         stack_name = cfn_settings[&#39;StackName&#39;]
         self.logger.entry(&#39;info&#39;, f&#39;Creating &#34;{stack_name}&#34; stack...&#39;)
 
         try:
-            stack_details = cfn_client.create_stack(**cfn_settings)
+            stack_details = cfn_resource.create_stack(**cfn_settings)
             self.logger.entry(&#39;debug&#39;, f&#39;Stack details:\n{pformat(stack_details)}&#39;)
 
             return stack_details
@@ -361,13 +362,14 @@ cfn = Cfn(logger)
             else:
                 self._aws_exception_msg(e)
 
-    def waiter(self, wait_for_status, cfn_client=None):
+    def waiter(self, wait_for_status, stack_name, cfn_resource=None):
         &#34;&#34;&#34;Description:
             CloudFormation waiter
 
         Args:
-            wait_for_status: Wait for status, e.g `stack_create_complete`
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            wait_for_status (str): Wait for status, e.g `stack_create_complete`
+            stack_name (str): Name of the CloudFormation stack
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -378,11 +380,11 @@ cfn = Cfn(logger)
             None
 
         &#34;&#34;&#34;
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
         try:
-            waiter = cfn_client.get_waiter(wait_for_status)
-            waiter.wait()
+            waiter = cfn_resource.get_waiter(wait_for_status)
+            waiter.wait(StackName=stack_name)
 
         except ClientError as e:
             self._aws_exception_msg(e)
@@ -392,12 +394,12 @@ cfn = Cfn(logger)
         msg = e.response[&#39;Error&#39;][&#39;Message&#39;]
         sys.exit(f&#39;Error: {msg}&#39;)
 
-    def outputs_to_dict(self, cfn_id, cfn_client=None):
+    def outputs_to_dict(self, cfn_id, cfn_resource=None):
         &#34;&#34;&#34;
 
         Args:
             cfn_id: CloudFormation ID from which to extract the outputs
-            cfn_client: (Optional) `cloudformation` client - used for assumed roles
+            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
         Example:
             Example usage:
@@ -411,9 +413,9 @@ cfn = Cfn(logger)
             CloudFormation outputs as a dictionary
         &#34;&#34;&#34;
         self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-        cfn_client = cfn_client if cfn_client else self.default_cfn_client
+        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
-        cfn_details = cfn_client.describe_stacks(StackName=cfn_id)
+        cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
         cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
@@ -429,7 +431,7 @@ cfn = Cfn(logger)
 <h3>Methods</h3>
 <dl>
 <dt id="onnawscfn.cfn.Cfn.create_stack"><code class="name flex">
-<span>def <span class="ident">create_stack</span></span>(<span>self, cfn_settings, cfn_client=None)</span>
+<span>def <span class="ident">create_stack</span></span>(<span>self, cfn_settings, cfn_resource=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="description">Description</h2>
@@ -438,8 +440,8 @@ cfn = Cfn(logger)
 <dl>
 <dt><strong><code>cfn_settings</code></strong> :&ensp;<code>dict</code></dt>
 <dd><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack"><code>create_stack</code></a> request parameters</dd>
-<dt><strong><code>cfn_client</code></strong></dt>
-<dd>(Optional) <code>cloudformation</code> client - used for assumed roles</dd>
+<dt><strong><code>cfn_resource</code></strong></dt>
+<dd>(Optional) <code>cloudformation</code> resource - used for assumed roles</dd>
 </dl>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
@@ -474,13 +476,13 @@ pprint(result)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_stack(self, cfn_settings, cfn_client=None):
+<pre><code class="python">def create_stack(self, cfn_settings, cfn_resource=None):
     &#34;&#34;&#34;Description:
         Creates a CloudFormation stack
 
     Args:
         cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-        cfn_client: (Optional) `cloudformation` client - used for assumed roles
+        cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
     Example:
         Example usage:
@@ -514,13 +516,13 @@ pprint(result)
         [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) response or `False` if a template with this name already exists
 
     &#34;&#34;&#34;
-    cfn_client = cfn_client if cfn_client else self.default_cfn_client
+    cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
     stack_name = cfn_settings[&#39;StackName&#39;]
     self.logger.entry(&#39;info&#39;, f&#39;Creating &#34;{stack_name}&#34; stack...&#39;)
 
     try:
-        stack_details = cfn_client.create_stack(**cfn_settings)
+        stack_details = cfn_resource.create_stack(**cfn_settings)
         self.logger.entry(&#39;debug&#39;, f&#39;Stack details:\n{pformat(stack_details)}&#39;)
 
         return stack_details
@@ -608,15 +610,15 @@ pprint(cfn_params)
 </details>
 </dd>
 <dt id="onnawscfn.cfn.Cfn.outputs_to_dict"><code class="name flex">
-<span>def <span class="ident">outputs_to_dict</span></span>(<span>self, cfn_id, cfn_client=None)</span>
+<span>def <span class="ident">outputs_to_dict</span></span>(<span>self, cfn_id, cfn_resource=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cfn_id</code></strong></dt>
 <dd>CloudFormation ID from which to extract the outputs</dd>
-<dt><strong><code>cfn_client</code></strong></dt>
-<dd>(Optional) <code>cloudformation</code> client - used for assumed roles</dd>
+<dt><strong><code>cfn_resource</code></strong></dt>
+<dd>(Optional) <code>cloudformation</code> resource - used for assumed roles</dd>
 </dl>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
@@ -634,12 +636,12 @@ pprint(cfn_outputs)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def outputs_to_dict(self, cfn_id, cfn_client=None):
+<pre><code class="python">def outputs_to_dict(self, cfn_id, cfn_resource=None):
     &#34;&#34;&#34;
 
     Args:
         cfn_id: CloudFormation ID from which to extract the outputs
-        cfn_client: (Optional) `cloudformation` client - used for assumed roles
+        cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
     Example:
         Example usage:
@@ -653,9 +655,9 @@ pprint(cfn_outputs)
         CloudFormation outputs as a dictionary
     &#34;&#34;&#34;
     self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-    cfn_client = cfn_client if cfn_client else self.default_cfn_client
+    cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
-    cfn_details = cfn_client.describe_stacks(StackName=cfn_id)
+    cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
     cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
     self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
@@ -670,17 +672,19 @@ pprint(cfn_outputs)
 </details>
 </dd>
 <dt id="onnawscfn.cfn.Cfn.waiter"><code class="name flex">
-<span>def <span class="ident">waiter</span></span>(<span>self, wait_for_status, cfn_client=None)</span>
+<span>def <span class="ident">waiter</span></span>(<span>self, wait_for_status, stack_name, cfn_resource=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="description">Description</h2>
 <p>CloudFormation waiter</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>wait_for_status</code></strong></dt>
+<dt><strong><code>wait_for_status</code></strong> :&ensp;<code>str</code></dt>
 <dd>Wait for status, e.g <code>stack_create_complete</code></dd>
-<dt><strong><code>cfn_client</code></strong></dt>
-<dd>(Optional) <code>cloudformation</code> client - used for assumed roles</dd>
+<dt><strong><code>stack_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the CloudFormation stack</dd>
+<dt><strong><code>cfn_resource</code></strong></dt>
+<dd>(Optional) <code>cloudformation</code> resource - used for assumed roles</dd>
 </dl>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
@@ -694,13 +698,14 @@ pprint(cfn_outputs)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def waiter(self, wait_for_status, cfn_client=None):
+<pre><code class="python">def waiter(self, wait_for_status, stack_name, cfn_resource=None):
     &#34;&#34;&#34;Description:
         CloudFormation waiter
 
     Args:
-        wait_for_status: Wait for status, e.g `stack_create_complete`
-        cfn_client: (Optional) `cloudformation` client - used for assumed roles
+        wait_for_status (str): Wait for status, e.g `stack_create_complete`
+        stack_name (str): Name of the CloudFormation stack
+        cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
 
     Example:
         Example usage:
@@ -711,11 +716,11 @@ pprint(cfn_outputs)
         None
 
     &#34;&#34;&#34;
-    cfn_client = cfn_client if cfn_client else self.default_cfn_client
+    cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
 
     try:
-        waiter = cfn_client.get_waiter(wait_for_status)
-        waiter.wait()
+        waiter = cfn_resource.get_waiter(wait_for_status)
+        waiter.wait(StackName=stack_name)
 
     except ClientError as e:
         self._aws_exception_msg(e)</code></pre>

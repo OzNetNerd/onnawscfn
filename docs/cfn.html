@@ -86,13 +86,13 @@ class Cfn:
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation params:\n{pformat(cfn_params)}&#39;)
         return cfn_params
 
-    def create_stack(self, cfn_settings, cfn_resource=None):
+    def create_stack(self, cfn_resource=None, **cfn_settings):
         &#34;&#34;&#34;Description:
             Creates a CloudFormation stack
 
         Args:
-            cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+            cfn_resource: `cloudformation` resource - used for assumed roles
+            cfn_settings (**kwargs): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
 
         Example:
             Example usage:
@@ -102,16 +102,8 @@ class Cfn:
                     &#39;ExternalId&#39;: org_id,
                 }
 
-                cfn_params = self.onn_cfn.dict_to_cfn_params(params)
-
-                cfn_settings = {
-                    &#39;StackName&#39;: STACK_NAME,
-                    &#39;TemplateURL&#39;: TEMPLATE_URL,
-                    &#39;Parameters&#39;: cfn_params,
-                    &#39;Capabilities&#39;: [&#39;CAPABILITY_NAMED_IAM&#39;],
-                }
-
-                result = self.onn_cfn.create_stack(cfn_settings)
+                cfn_params = onn_cfn.dict_to_cfn_params(params)
+                result = onn_cfn.create_stack(StackName=STACK_NAME, TemplateURL=TEMPLATE_URL, Parameters=cfn_params, Capabilities=[&#39;CAPABILITY_NAMED_IAM&#39;])
                 pprint(result)
                 {&#39;ResponseMetadata&#39;: {&#39;HTTPHeaders&#39;: {&#39;content-length&#39;: &#39;385&#39;,
                                           &#39;content-type&#39;: &#39;text/xml&#39;,
@@ -301,13 +293,13 @@ cfn = Cfn(logger)
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation params:\n{pformat(cfn_params)}&#39;)
         return cfn_params
 
-    def create_stack(self, cfn_settings, cfn_resource=None):
+    def create_stack(self, cfn_resource=None, **cfn_settings):
         &#34;&#34;&#34;Description:
             Creates a CloudFormation stack
 
         Args:
-            cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+            cfn_resource: `cloudformation` resource - used for assumed roles
+            cfn_settings (**kwargs): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
 
         Example:
             Example usage:
@@ -317,16 +309,8 @@ cfn = Cfn(logger)
                     &#39;ExternalId&#39;: org_id,
                 }
 
-                cfn_params = self.onn_cfn.dict_to_cfn_params(params)
-
-                cfn_settings = {
-                    &#39;StackName&#39;: STACK_NAME,
-                    &#39;TemplateURL&#39;: TEMPLATE_URL,
-                    &#39;Parameters&#39;: cfn_params,
-                    &#39;Capabilities&#39;: [&#39;CAPABILITY_NAMED_IAM&#39;],
-                }
-
-                result = self.onn_cfn.create_stack(cfn_settings)
+                cfn_params = onn_cfn.dict_to_cfn_params(params)
+                result = onn_cfn.create_stack(StackName=STACK_NAME, TemplateURL=TEMPLATE_URL, Parameters=cfn_params, Capabilities=[&#39;CAPABILITY_NAMED_IAM&#39;])
                 pprint(result)
                 {&#39;ResponseMetadata&#39;: {&#39;HTTPHeaders&#39;: {&#39;content-length&#39;: &#39;385&#39;,
                                           &#39;content-type&#39;: &#39;text/xml&#39;,
@@ -431,18 +415,17 @@ cfn = Cfn(logger)
 <h3>Methods</h3>
 <dl>
 <dt id="onnawscfn.cfn.Cfn.create_stack"><code class="name flex">
-<span>def <span class="ident">create_stack</span></span>(<span>self, cfn_settings, cfn_resource=None)</span>
+<span>def <span class="ident">create_stack</span></span>(<span>self, cfn_resource=None, **cfn_settings)</span>
 </code></dt>
 <dd>
 <section class="desc"><h2 id="description">Description</h2>
 <p>Creates a CloudFormation stack</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>cfn_settings</code></strong> :&ensp;<code>dict</code></dt>
-<dd><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack"><code>create_stack</code></a> request parameters</dd>
 <dt><strong><code>cfn_resource</code></strong></dt>
-<dd>(Optional) <code>cloudformation</code> resource - used for assumed roles</dd>
+<dd><code>cloudformation</code> resource - used for assumed roles</dd>
 </dl>
+<p>cfn_settings (**kwargs): <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack"><code>create_stack</code></a> request parameters</p>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
 <pre><code>params = {
@@ -450,16 +433,8 @@ cfn = Cfn(logger)
     'ExternalId': org_id,
 }
 
-cfn_params = self.onn_cfn.dict_to_cfn_params(params)
-
-cfn_settings = {
-    'StackName': STACK_NAME,
-    'TemplateURL': TEMPLATE_URL,
-    'Parameters': cfn_params,
-    'Capabilities': ['CAPABILITY_NAMED_IAM'],
-}
-
-result = self.onn_cfn.create_stack(cfn_settings)
+cfn_params = onn_cfn.dict_to_cfn_params(params)
+result = onn_cfn.create_stack(StackName=STACK_NAME, TemplateURL=TEMPLATE_URL, Parameters=cfn_params, Capabilities=['CAPABILITY_NAMED_IAM'])
 pprint(result)
 {'ResponseMetadata': {'HTTPHeaders': {'content-length': '385',
                           'content-type': 'text/xml',
@@ -476,13 +451,13 @@ pprint(result)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_stack(self, cfn_settings, cfn_resource=None):
+<pre><code class="python">def create_stack(self, cfn_resource=None, **cfn_settings):
     &#34;&#34;&#34;Description:
         Creates a CloudFormation stack
 
     Args:
-        cfn_settings (dict): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
-        cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+        cfn_resource: `cloudformation` resource - used for assumed roles
+        cfn_settings (**kwargs): [`create_stack`](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html#CloudFormation.Client.create_stack) request parameters
 
     Example:
         Example usage:
@@ -492,16 +467,8 @@ pprint(result)
                 &#39;ExternalId&#39;: org_id,
             }
 
-            cfn_params = self.onn_cfn.dict_to_cfn_params(params)
-
-            cfn_settings = {
-                &#39;StackName&#39;: STACK_NAME,
-                &#39;TemplateURL&#39;: TEMPLATE_URL,
-                &#39;Parameters&#39;: cfn_params,
-                &#39;Capabilities&#39;: [&#39;CAPABILITY_NAMED_IAM&#39;],
-            }
-
-            result = self.onn_cfn.create_stack(cfn_settings)
+            cfn_params = onn_cfn.dict_to_cfn_params(params)
+            result = onn_cfn.create_stack(StackName=STACK_NAME, TemplateURL=TEMPLATE_URL, Parameters=cfn_params, Capabilities=[&#39;CAPABILITY_NAMED_IAM&#39;])
             pprint(result)
             {&#39;ResponseMetadata&#39;: {&#39;HTTPHeaders&#39;: {&#39;content-length&#39;: &#39;385&#39;,
                                       &#39;content-type&#39;: &#39;text/xml&#39;,

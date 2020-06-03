@@ -151,7 +151,7 @@ class Cfn:
         Example:
             Example usage:
 
-            cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
+                cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
 
         Returns:
             None
@@ -171,18 +171,19 @@ class Cfn:
         msg = e.response[&#39;Error&#39;][&#39;Message&#39;]
         sys.exit(f&#39;Error: {msg}&#39;)
 
-    def outputs_to_dict(self, cfn_id, cfn_resource=None):
-        &#34;&#34;&#34;
+    def outputs_to_dict(self, cfn_outputs):
+        &#34;&#34;&#34;Description:
+            Converts a CloudFormation outputs to a `dict`
 
         Args:
-            cfn_id: CloudFormation ID from which to extract the outputs
-            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+            cfn_outputs (list): CFN outputs
 
         Example:
             Example usage:
 
-                cfn_outputs = cfn.outputs_to_dict(cfn_id)
-                pprint(cfn_outputs)
+                cfn_outputs = cf_client.describe_stacks(StackName=STACK_NAME)[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
+                dict_outputs = cfn.outputs_to_dict(cfn_outputs)
+                pprint(dict_outputs)
                 {&#39;Hostname&#39;: &#39;TestHost&#39;,
                 &#39;Version&#39;: &#39;1.18&#39;}
 
@@ -190,10 +191,6 @@ class Cfn:
             CloudFormation outputs as a dictionary
         &#34;&#34;&#34;
         self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
-
-        cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
-        cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
         output = {}
@@ -358,7 +355,7 @@ cfn = Cfn(logger)
         Example:
             Example usage:
 
-            cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
+                cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
 
         Returns:
             None
@@ -378,18 +375,19 @@ cfn = Cfn(logger)
         msg = e.response[&#39;Error&#39;][&#39;Message&#39;]
         sys.exit(f&#39;Error: {msg}&#39;)
 
-    def outputs_to_dict(self, cfn_id, cfn_resource=None):
-        &#34;&#34;&#34;
+    def outputs_to_dict(self, cfn_outputs):
+        &#34;&#34;&#34;Description:
+            Converts a CloudFormation outputs to a `dict`
 
         Args:
-            cfn_id: CloudFormation ID from which to extract the outputs
-            cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+            cfn_outputs (list): CFN outputs
 
         Example:
             Example usage:
 
-                cfn_outputs = cfn.outputs_to_dict(cfn_id)
-                pprint(cfn_outputs)
+                cfn_outputs = cf_client.describe_stacks(StackName=STACK_NAME)[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
+                dict_outputs = cfn.outputs_to_dict(cfn_outputs)
+                pprint(dict_outputs)
                 {&#39;Hostname&#39;: &#39;TestHost&#39;,
                 &#39;Version&#39;: &#39;1.18&#39;}
 
@@ -397,10 +395,6 @@ cfn = Cfn(logger)
             CloudFormation outputs as a dictionary
         &#34;&#34;&#34;
         self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-        cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
-
-        cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
-        cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
         self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
         output = {}
@@ -577,20 +571,21 @@ pprint(cfn_params)
 </details>
 </dd>
 <dt id="onnawscfn.cfn.Cfn.outputs_to_dict"><code class="name flex">
-<span>def <span class="ident">outputs_to_dict</span></span>(<span>self, cfn_id, cfn_resource=None)</span>
+<span>def <span class="ident">outputs_to_dict</span></span>(<span>self, cfn_outputs)</span>
 </code></dt>
 <dd>
-<section class="desc"><h2 id="args">Args</h2>
+<section class="desc"><h2 id="description">Description</h2>
+<p>Converts a CloudFormation outputs to a <code>dict</code></p>
+<h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>cfn_id</code></strong></dt>
-<dd>CloudFormation ID from which to extract the outputs</dd>
-<dt><strong><code>cfn_resource</code></strong></dt>
-<dd>(Optional) <code>cloudformation</code> resource - used for assumed roles</dd>
+<dt><strong><code>cfn_outputs</code></strong> :&ensp;<code>list</code></dt>
+<dd>CFN outputs</dd>
 </dl>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
-<pre><code>cfn_outputs = cfn.outputs_to_dict(cfn_id)
-pprint(cfn_outputs)
+<pre><code>cfn_outputs = cf_client.describe_stacks(StackName=STACK_NAME)['Stacks'][0]['Outputs']
+dict_outputs = cfn.outputs_to_dict(cfn_outputs)
+pprint(dict_outputs)
 {'Hostname': 'TestHost',
 'Version': '1.18'}
 </code></pre>
@@ -603,18 +598,19 @@ pprint(cfn_outputs)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def outputs_to_dict(self, cfn_id, cfn_resource=None):
-    &#34;&#34;&#34;
+<pre><code class="python">def outputs_to_dict(self, cfn_outputs):
+    &#34;&#34;&#34;Description:
+        Converts a CloudFormation outputs to a `dict`
 
     Args:
-        cfn_id: CloudFormation ID from which to extract the outputs
-        cfn_resource: (Optional) `cloudformation` resource - used for assumed roles
+        cfn_outputs (list): CFN outputs
 
     Example:
         Example usage:
 
-            cfn_outputs = cfn.outputs_to_dict(cfn_id)
-            pprint(cfn_outputs)
+            cfn_outputs = cf_client.describe_stacks(StackName=STACK_NAME)[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
+            dict_outputs = cfn.outputs_to_dict(cfn_outputs)
+            pprint(dict_outputs)
             {&#39;Hostname&#39;: &#39;TestHost&#39;,
             &#39;Version&#39;: &#39;1.18&#39;}
 
@@ -622,10 +618,6 @@ pprint(cfn_outputs)
         CloudFormation outputs as a dictionary
     &#34;&#34;&#34;
     self.logger.entry(&#39;debug&#39;, &#39;Converting CloudFormation outputs to dict...&#39;)
-    cfn_resource = cfn_resource if cfn_resource else self.default_cfn_resource
-
-    cfn_details = cfn_resource.describe_stacks(StackName=cfn_id)
-    cfn_outputs = cfn_details[&#39;Stacks&#39;][0][&#39;Outputs&#39;]
     self.logger.entry(&#39;debug&#39;, f&#39;CloudFormation outputs:\n{pformat(cfn_outputs)}&#39;)
 
     output = {}
@@ -655,7 +647,8 @@ pprint(cfn_outputs)
 </dl>
 <h2 id="example">Example</h2>
 <p>Example usage:</p>
-<p>cfn.waiter(wait_for_status='stack_create_complete')</p>
+<pre><code>cfn.waiter(wait_for_status='stack_create_complete')
+</code></pre>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>None</code></dt>
@@ -677,7 +670,7 @@ pprint(cfn_outputs)
     Example:
         Example usage:
 
-        cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
+            cfn.waiter(wait_for_status=&#39;stack_create_complete&#39;)
 
     Returns:
         None
